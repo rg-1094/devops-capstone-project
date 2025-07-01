@@ -94,12 +94,10 @@ class TestAccountService(TestCase):
         data = resp.get_json()
         self.assertEqual(data["status"], "OK")
 
-    def test_security_header(self):
-        """Security: The header should contain security information"""
-        response = self.client.get("/", environ_overrides=HTTPS_ENVIRON)
+    def test_security_headers(self):
+        """It should return security headers"""
+        response = self.client.get('/', environ_overrides=HTTPS_ENVIRON)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # For more information about the options of headers:
-        # See Flask Talisman documentation
         headers = {
             'X-Frame-Options': 'SAMEORIGIN',
             'X-Content-Type-Options': 'nosniff',
@@ -264,3 +262,10 @@ class TestAccountService(TestCase):
         self.assertEqual(len(response.get_json()), 0)
         # Just to be sure
         self.assertEqual(len(Account.all()), 0)
+
+    def test_cors_security(self):
+        """It should return a CORS header"""
+        response = self.client.get('/', environ_overrides=HTTPS_ENVIRON)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Check for the CORS header
+        self.assertEqual(response.headers.get('Access-Control-Allow-Origin'), '*')
